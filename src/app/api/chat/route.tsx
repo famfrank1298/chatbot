@@ -1,8 +1,5 @@
-import { OpenAIStream, StreamingTextResponse, streamText } from "ai";
 import OpenAI from "openai";
-import { createOpenAI, openai } from "@ai-sdk/openai";
 import { NextResponse } from "next/server";
-import { Completions } from "openai/resources/completions.mjs";
 
 const systemPrompt = `Welcome to FamFinance, the platform dedicated to helping young investors start their journey in the world of finance. As the customer support AI, you are familiar with all aspects of the FamFinance platform, including navigation, features, and educational resources. Your role is to assist users with inquiries about long-term investments, different investment types, suitable investing platforms, finance YouTubers, and more.
 
@@ -29,10 +26,6 @@ AI Response: "Check out [YouTuber A], [YouTuber B], and [YouTuber C] for beginne
 
 Always aim to provide users with helpful and informative responses, ensuring a positive and educational experience on the FamFinance platform.`;
 
-// const openai = createOpenAI({
-//   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || "",
-// });
-
 export const runtime = "edge";
 
 export async function POST(req: { json: () => any }) {
@@ -55,6 +48,4 @@ export async function POST(req: { json: () => any }) {
     { message: response.choices[0].message.content },
     { status: 200 }
   );
-
-  // return response.toDataStreamResponse();
 }
