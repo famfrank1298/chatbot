@@ -43,8 +43,6 @@ export default function Home() {
       { role: "assistant", content: data.message },
     ]);
 
-    console.log("MSGS: ", messages);
-
     // updating user db with new messages
     if (user) {
       const docRef = doc(db, dbName, user?.uid as string);
@@ -91,7 +89,6 @@ export default function Home() {
             chat: messages,
           };
           if (user) setDoc(docRef, newPerson);
-          console.log("No such document!");
         }
       } catch (error) {
         console.error("Error fetching document:", error);
@@ -106,8 +103,6 @@ export default function Home() {
       googleSignIn();
       const docRef = doc(db, dbName, user?.uid as string);
       const docSnap = await getDoc(docRef);
-
-      console.log("userID: ", user?.uid);
 
       if (docSnap.exists()) {
         const prevMsg = docSnap.data().chat;

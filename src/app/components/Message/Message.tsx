@@ -22,7 +22,6 @@ const Message: React.FC<MessageProp> = ({ message, streamText }) => {
       if (currentIndex !== content.length) {
         setDisplayedText(content.substring(0, currentIndex + 1));
         currentIndex++;
-        console.log("currentIndex: ", currentIndex);
       } else {
         clearInterval(interval);
       }

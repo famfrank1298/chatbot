@@ -13,8 +13,3 @@ export const authOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
-
-console.log("clientID: ", process.env.GOOGLE_CLIENT_ID as string);
-console.log("clientSecret: ", process.env.GOOGLE_CLIENT_SECRET as string);
-
-// export default NextAuth(authOptions);
