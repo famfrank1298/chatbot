@@ -9,9 +9,10 @@ interface MessageData {
 
 interface MessageProp {
   message: MessageData;
+  streamText: boolean;
 }
 
-const Message: React.FC<MessageProp> = ({ message }) => {
+const Message: React.FC<MessageProp> = ({ message, streamText }) => {
   const { role, content } = message;
   const [displayedText, setDisplayedText] = useState("");
 
@@ -37,7 +38,7 @@ const Message: React.FC<MessageProp> = ({ message }) => {
           <Bot />
           Assistant:
         </div>
-        {displayedText}
+        {streamText ? content : displayedText}
       </div>
     );
   }
