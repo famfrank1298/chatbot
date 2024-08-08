@@ -4,92 +4,141 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import Message from "./components/Message/Message";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { db, dbName } from "./firebase";
 import { UserAuth } from "./context/AuthContext";
 
-import { signOut, useSession } from "next-auth/react";
 import Login from "./components/Login/Login";
 
 export default function Home() {
-  // const session = useSession();
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content:
+        "Hi! I'm the FamFinance support assistant. How can I help you today?",
+    },
+  ]);
+  const [message, setMessage] = useState("");
+  const { user, setUser, googleSignIn, logOut } = UserAuth();
+  const [loading, setLoading] = useState(true);
 
-  // const [messages, setMessages] = useState([
-  //   {
-  //     role: "assistant",
-  //     content:
-  //       "Hi! I'm the FamFinance support assistant. How can I help you today?",
-  //   },
-  // ]);
-  // const [message, setMessage] = useState("");
+  const sendMessage = async () => {
+    setMessage("");
+    setMessages((messages) => [
+      ...messages,
+      { role: "user", content: message },
+    ]);
 
-  // const sendMessage = async () => {
-  //   setMessage("");
-  //   setMessages((messages) => [
-  //     ...messages,
-  //     { role: "user", content: message },
-  //   ]);
+    const response = await fetch("api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify([...messages, { role: "user", content: message }]),
+    });
 
-  //   const response = await fetch("api/chat", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify([...messages, { role: "user", content: message }]),
-  //   });
+    const data = await response.json();
+    setMessages((messages) => [
+      ...messages,
+      { role: "assistant", content: data.message },
+    ]);
 
-  //   const data = await response.json();
-  //   setMessages((messages) => [
-  //     ...messages,
-  //     { role: "assistant", content: data.message },
-  //   ]);
+    console.log("MSGS: ", messages);
 
-  //   // updating user db with new messages
-  //   const docRef = doc(db, dbName, "test101@gmail.com");
-  //   await updateDoc(docRef, {
-  //     chat: messages,
-  //   });
-  // };
+    // updating user db with new messages
+    if (user) {
+      const docRef = doc(db, dbName, user?.uid as string);
+      await updateDoc(docRef, {
+        chat: messages,
+      });
+    }
+  };
 
   // retrieving previous message data
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const docRef = doc(db, dbName, "test101@gmail.com");
-  //       const docSnap = await getDoc(docRef);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const docRef = doc(db, dbName, user?.uid as string);
+        const docSnap = await getDoc(docRef);
 
-  //       if (docSnap.exists()) {
-  //         const prevMsg = docSnap.data().chat;
-  //         setMessages([
-  //           ...prevMsg,
-  //           {
-  //             role: "assistant",
-  //             content: "Hi! Welcome back. How can I help you today?",
-  //           },
-  //         ]);
-  //       } else {
-  //         setMessages([
-  //           {
-  //             role: "assistant",
-  //             content:
-  //               "Hi! I'm the FamFinance support assistant. How can I help you today?",
-  //           },
-  //         ]);
-  //         console.log("No such document!");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching document:", error);
-  //     }
-  //   };
+        if (docSnap.exists()) {
+          const prevMsg = docSnap.data().chat;
+          setMessages([
+            ...prevMsg,
+            {
+              role: "assistant",
+              content:
+                "Hi " +
+                user?.displayName +
+                "! Welcome back. How can I help you today?",
+            },
+          ]);
+        } else {
+          const displayName = user ? user.displayName ?? "" : "";
+          setMessages([
+            {
+              role: "assistant",
+              content:
+                "Hi " +
+                displayName +
+                "! I'm the FamFinance support assistant. How can I help you today?",
+            },
+          ]);
 
-  //   fetchData();
-  // }, []);
+          const newPerson = {
+            name: user?.displayName,
+            email: user?.email,
+            chat: messages,
+          };
+          if (user) setDoc(docRef, newPerson);
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching document:", error);
+      }
+    };
 
-  const { user, setUser, googleSignIn, logOut } = UserAuth();
+    fetchData();
+  }, [user, messages]);
 
   const handleSignIn = async () => {
     try {
       googleSignIn();
+      const docRef = doc(db, dbName, user?.uid as string);
+      const docSnap = await getDoc(docRef);
+
+      console.log("userID: ", user?.uid);
+
+      if (docSnap.exists()) {
+        const prevMsg = docSnap.data().chat;
+        setMessages([
+          ...prevMsg,
+          {
+            role: "assistant",
+            content:
+              "Hi " +
+              user?.displayName +
+              "! Welcome back. How can I help you today?",
+          },
+        ]);
+      } else {
+        setMessages([
+          {
+            role: "assistant",
+            content:
+              "Hi " +
+              user?.displayName +
+              "! I'm the FamFinance support assistant. How can I help you today?",
+          },
+        ]);
+
+        const newPerson = {
+          name: user?.displayName,
+          email: user?.email,
+          chat: messages,
+        };
+        setDoc(docRef, newPerson);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -97,13 +146,20 @@ export default function Home() {
 
   const handleSignOut = async () => {
     try {
+      setLoading(true);
       logOut();
+      setMessages([
+        {
+          role: "assistant",
+          content:
+            "Hi! I'm the FamFinance support assistant. How can I help you today?",
+        },
+      ]);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
   };
-
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -113,26 +169,25 @@ export default function Home() {
     checkAuthentication();
   });
 
-  // displayName, email, uid
-
   return (
     <main className="fixed h-full w-full  bg-muted">
-      <Button onClick={handleSignIn}> Login</Button>
-      <Button onClick={handleSignOut}> Sign Out</Button>
-
       {loading ? null : !user ? (
-        <p>No user logged in!</p>
+        <Button onClick={handleSignIn}> Login</Button>
       ) : (
-        <p>Welcome, {user.displayName}</p>
+        <Button onClick={handleSignOut}> Sign Out</Button>
       )}
-      {/* <div>{session?.data?.user?.name}</div>
-      <button onClick={() => signOut()}>Logout</button> */}
 
-      {/* <div className="container h-full w-full flex flex-col py-8">
+      <div className="container h-full w-full flex flex-col py-8">
         <div className="flex-1 overflow-y-auto">
-          {messages.map((message, index) => (
-            <Message key={index} message={message} />
-          ))}
+          {loading
+            ? null
+            : messages.map((message, index) => (
+                <Message
+                  key={index}
+                  message={message}
+                  streamText={index !== messages.length - 1}
+                />
+              ))}
         </div>
         <div className="mt-auto relative">
           <Textarea
@@ -151,7 +206,7 @@ export default function Home() {
             <Send size={24} />
           </Button>
         </div>
-      </div> */}
+      </div>
     </main>
   );
 }
