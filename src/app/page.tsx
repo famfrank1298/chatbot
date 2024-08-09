@@ -3,12 +3,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { useEffect, useState } from "react";
-import Message from "./components/Message/Message";
+import Message from "../components/Message/Message";
 import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { db, dbName } from "./firebase";
 import { UserAuth } from "./context/AuthContext";
-
-import Login from "./components/Login/Login";
+import { ModeToggle } from "@/components/ui/ModeToggle/ModeToggle";
+import Footer from "@/components/Footer/Footer";
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -100,6 +100,7 @@ export default function Home() {
 
   const handleSignIn = async () => {
     try {
+      setLoading(true);
       googleSignIn();
       const docRef = doc(db, dbName, user?.uid as string);
       const docSnap = await getDoc(docRef);
@@ -134,6 +135,7 @@ export default function Home() {
         };
         setDoc(docRef, newPerson);
       }
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -165,15 +167,25 @@ export default function Home() {
   });
 
   return (
-    <main className="fixed h-full w-full  bg-muted">
-      {loading ? null : !user ? (
-        <Button onClick={handleSignIn}> Login</Button>
-      ) : (
-        <Button onClick={handleSignOut}> Sign Out</Button>
-      )}
+    <main className="home-container">
+      <div className="nav-container">
+        <h1>𝔽𝕒𝕞𝔽𝕚𝕟𝕒𝕟𝕔𝕖</h1>
+        <div className="nav-list">
+          {loading ? null : !user ? (
+            <Button onClick={handleSignIn}> Login</Button>
+          ) : (
+            <Button onClick={handleSignOut}> Sign Out</Button>
+          )}
+          <ModeToggle />
+        </div>
+      </div>
 
-      <div className="container h-full w-full flex flex-col py-8">
-        <div className="flex-1 overflow-y-auto">
+      <h1 className="welcome-text">
+        {user ? "Welcome, " + user.displayName + " 😎" : "Welcome, New User!"}
+      </h1>
+
+      <div className="chatbox">
+        <div className="response-box">
           {loading
             ? null
             : messages.map((message, index) => (
@@ -184,7 +196,7 @@ export default function Home() {
                 />
               ))}
         </div>
-        <div className="mt-auto relative">
+        <div className="text-container">
           <Textarea
             className="w-full text-lg"
             placeholder="Say something..."
@@ -195,13 +207,14 @@ export default function Home() {
             type="submit"
             size="icon"
             disabled={!message}
-            className="absolute top-1/2 transform -translate-y-1/2 right-4 rounded-full"
+            className="rounded-full sendButton"
             onClick={sendMessage}
           >
             <Send size={24} />
           </Button>
         </div>
       </div>
+      <Footer />
     </main>
   );
 }

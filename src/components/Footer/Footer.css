@@ -1,0 +1,4 @@
+.footer-container {
+  border-top: 1px solid hsl(var(--foreground));
+  padding: 3rem 0;
+}
