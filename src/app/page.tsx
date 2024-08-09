@@ -9,6 +9,7 @@ import { db, dbName } from "./firebase";
 import { UserAuth } from "./context/AuthContext";
 import { ModeToggle } from "@/components/ui/ModeToggle/ModeToggle";
 import Footer from "@/components/Footer/Footer";
+import About from "@/components/About/About";
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -180,38 +181,45 @@ export default function Home() {
         </div>
       </div>
 
-      <h1 className="welcome-text">
-        {user ? "Welcome, " + user.displayName + " 😎" : "Welcome, New User!"}
-      </h1>
+      <div className="body-section">
+        <About />
+        <div>
+          <h1 className="welcome-text">
+            {user
+              ? "Welcome, " + user.displayName + " 😎"
+              : "Welcome, New User!"}
+          </h1>
 
-      <div className="chatbox">
-        <div className="response-box">
-          {loading
-            ? null
-            : messages.map((message, index) => (
-                <Message
-                  key={index}
-                  message={message}
-                  streamText={index !== messages.length - 1}
-                />
-              ))}
-        </div>
-        <div className="text-container">
-          <Textarea
-            className="w-full text-lg"
-            placeholder="Say something..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          <Button
-            type="submit"
-            size="icon"
-            disabled={!message}
-            className="rounded-full sendButton"
-            onClick={sendMessage}
-          >
-            <Send size={24} />
-          </Button>
+          <div className="chatbox">
+            <div className="response-box">
+              {loading
+                ? null
+                : messages.map((message, index) => (
+                    <Message
+                      key={index}
+                      message={message}
+                      streamText={index !== messages.length - 1}
+                    />
+                  ))}
+            </div>
+            <div className="text-container">
+              <Textarea
+                className="w-full text-lg"
+                placeholder="Say something..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!message}
+                className="rounded-full sendButton"
+                onClick={sendMessage}
+              >
+                <Send size={24} />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
       <Footer />

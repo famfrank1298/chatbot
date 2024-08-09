@@ -119,8 +119,16 @@ p {
   width: 100vw;
 }
 
+.body-section {
+  display: flex;
+  justify-content: space-evenly;
+  width: 80%;
+  margin: 0 auto;
+  gap: 5rem;
+}
+
 .chatbox {
-  width: 60%;
+  width: 100%;
   margin: 1rem auto;
   box-shadow: 0 0 4px hsl(var(--foreground));
   border-radius: 20px;
