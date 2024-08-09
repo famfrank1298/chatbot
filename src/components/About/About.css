@@ -1,0 +1,12 @@
+.about-container {
+  width: 70%;
+  text-align: center;
+  margin: 2rem auto;
+}
+
+.about-text {
+  border-bottom: 2px dotted hsl(var(--foreground));
+  border-top: 2px dotted hsl(var(--foreground));
+  padding-bottom: 1rem;
+  padding-top: 2rem;
+}
