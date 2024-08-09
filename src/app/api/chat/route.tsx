@@ -43,7 +43,7 @@ export async function POST(req: { json: () => any }) {
     ],
     temperature: 1,
   });
-  console.log("response: ", response);
+
   return NextResponse.json(
     { message: response.choices[0].message.content },
     { status: 200 }

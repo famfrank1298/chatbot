@@ -4,23 +4,24 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --background: 210 60% 90%;
+    --foreground: 140 60% 20%;
+    --card: 210 50% 98%;
+    --card-foreground: 140 60% 20%;
+    --popover: 210 50% 98%;
+    --popover-foreground: 140 60% 20%;
+    --primary: 210 60% 40%;
+    --primary-foreground: 140 30% 95%;
+    --secondary: 140 30% 85%;
+    --secondary-foreground: 210 60% 40%;
+    --muted: 140 30% 85%;
+    --muted-foreground: 140 10% 50%;
+    --accent: 140 40% 75%;
+    --accent-foreground: 210 60% 20%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
+    --destructive-foreground: 140 30% 95%;
+    --border: 210 30% 80%;
+
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
@@ -32,23 +33,24 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
+    --background: 210 50% 10%;
+    --foreground: 140 30% 90%;
+    --card: 210 50% 15%;
+    --card-foreground: 140 30% 90%;
+    --popover: 210 50% 15%;
+    --popover-foreground: 140 30% 90%;
+    --primary: 210 70% 50%;
+    --primary-foreground: 140 50% 10%;
+    --secondary: 140 60% 25%;
+    --secondary-foreground: 210 70% 50%;
+    --muted: 140 60% 25%;
+    --muted-foreground: 140 40% 70%;
+    --accent: 140 50% 35%;
+    --accent-foreground: 210 70% 50%;
+    --destructive: 0 70% 40%;
+    --destructive-foreground: 140 30% 90%;
+    --border: 210 40% 20%;
+
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     --chart-1: 220 70% 50%;
@@ -66,4 +68,101 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--secondary-foreground))
+    hsl(var(--primary-foreground));
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  @apply scroll-m-20 text-2xl font-semibold tracking-tight;
+}
+
+h2 {
+  @apply scroll-m-20 text-xl font-semibold tracking-tight;
+}
+
+h3 {
+  @apply scroll-m-20 text-lg font-medium tracking-tight;
+}
+
+h4 {
+  @apply scroll-m-20 text-base font-medium tracking-tight;
+}
+
+h5 {
+  @apply scroll-m-20 text-sm font-medium tracking-tight;
+}
+
+p {
+  @apply leading-7 [&:not(:first-child)]:mt-6;
+}
+
+.home-container {
+  height: 100vh;
+  width: 100vw;
+}
+
+.chatbox {
+  width: 60%;
+  margin: 1rem auto;
+  box-shadow: 0 0 4px hsl(var(--foreground));
+  border-radius: 20px;
+  padding: 1rem;
+  margin-bottom: 5rem;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid hsl(var(--foreground));
+}
+
+.nav-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-items: center;
+}
+
+.welcome-text {
+  text-align: center;
+  margin: 1rem auto;
+  margin-top: 2rem;
+}
+
+.response-box {
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
+.text-container {
+  position: relative;
+}
+
+.sendButton {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  margin-right: 1rem;
 }
