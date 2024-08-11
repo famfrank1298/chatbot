@@ -2,7 +2,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Message from "../components/Message/Message";
 import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { db, dbName } from "./firebase";
@@ -22,74 +22,86 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const { user, setUser, googleSignIn, logOut } = UserAuth();
   const [loading, setLoading] = useState(true);
+  const scrollableDiv = document.getElementById(
+    "scrollableDiv"
+  ) as HTMLDivElement | null;
 
   const sendMessage = async () => {
     setMessage("");
-    setMessages((messages) => [
-      ...messages,
-      { role: "user", content: message },
-    ]);
+
+    // Create a new array with the current messages plus the new user message
+    const newMessages = [...messages, { role: "user", content: message }];
+    setMessages(newMessages);
 
     const response = await fetch("api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify([...messages, { role: "user", content: message }]),
+      body: JSON.stringify(newMessages),
     });
 
     const data = await response.json();
-    setMessages((messages) => [
-      ...messages,
+    // Add the assistant's response to the messages array
+    const updatedMessages = [
+      ...newMessages,
       { role: "assistant", content: data.message },
-    ]);
+    ];
+    setMessages(updatedMessages);
 
     // updating user db with new messages
     if (user) {
       const docRef = doc(db, dbName, user?.uid as string);
       await updateDoc(docRef, {
-        chat: messages,
+        chat: updatedMessages,
       });
+    }
+
+    if (scrollableDiv) {
+      scrollableDiv.scrollIntoView({ behavior: "smooth" });
+      scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
     }
   };
 
-  // retrieving previous message data
+  // handles user data, whether new client, returning client, or guest
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, dbName, user?.uid as string);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const prevMsg = docSnap.data().chat;
+        if (!user) {
           setMessages([
-            ...prevMsg,
             {
               role: "assistant",
               content:
-                "Hi " +
-                user?.displayName +
-                "! Welcome back. How can I help you today?",
+                "Hi! I'm the FamFinance support assistant. How can I help you today?",
             },
           ]);
         } else {
-          const displayName = user ? user.displayName ?? "" : "";
-          setMessages([
-            {
-              role: "assistant",
-              content:
-                "Hi " +
-                displayName +
-                "! I'm the FamFinance support assistant. How can I help you today?",
-            },
-          ]);
+          const docRef = doc(db, dbName, user?.uid as string);
+          const docSnap = await getDoc(docRef);
 
-          const newPerson = {
-            name: user?.displayName,
-            email: user?.email,
-            chat: messages,
-          };
-          if (user) setDoc(docRef, newPerson);
+          if (docSnap.exists()) {
+            // old client
+            const prevMsg = docSnap.data().chat;
+            setMessages(prevMsg);
+          } else {
+            // new client
+            const newChat = [
+              {
+                role: "assistant",
+                content:
+                  "Hi " +
+                  user?.displayName +
+                  "! I'm the FamFinance support assistant. How can I help you today?",
+              },
+            ];
+            setMessages(newChat);
+            const newPerson = {
+              name: user?.displayName,
+              email: user?.email,
+              chat: newChat,
+            };
+            setDoc(docRef, newPerson);
+          }
         }
       } catch (error) {
         console.error("Error fetching document:", error);
@@ -97,45 +109,12 @@ export default function Home() {
     };
 
     fetchData();
-  }, [user, messages]);
+  }, [user, messages, scrollableDiv]);
 
   const handleSignIn = async () => {
     try {
       setLoading(true);
       googleSignIn();
-      const docRef = doc(db, dbName, user?.uid as string);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const prevMsg = docSnap.data().chat;
-        setMessages([
-          ...prevMsg,
-          {
-            role: "assistant",
-            content:
-              "Hi " +
-              user?.displayName +
-              "! Welcome back. How can I help you today?",
-          },
-        ]);
-      } else {
-        setMessages([
-          {
-            role: "assistant",
-            content:
-              "Hi " +
-              user?.displayName +
-              "! I'm the FamFinance support assistant. How can I help you today?",
-          },
-        ]);
-
-        const newPerson = {
-          name: user?.displayName,
-          email: user?.email,
-          chat: messages,
-        };
-        setDoc(docRef, newPerson);
-      }
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -146,13 +125,6 @@ export default function Home() {
     try {
       setLoading(true);
       logOut();
-      setMessages([
-        {
-          role: "assistant",
-          content:
-            "Hi! I'm the FamFinance support assistant. How can I help you today?",
-        },
-      ]);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -172,10 +144,10 @@ export default function Home() {
       <div className="nav-container">
         <h1>𝔽𝕒𝕞𝔽𝕚𝕟𝕒𝕟𝕔𝕖</h1>
         <div className="nav-list">
-          {loading ? null : !user ? (
-            <Button onClick={handleSignIn}> Login</Button>
-          ) : (
+          {loading ? null : user ? (
             <Button onClick={handleSignOut}> Sign Out</Button>
+          ) : (
+            <Button onClick={handleSignIn}> Login</Button>
           )}
           <ModeToggle />
         </div>
@@ -191,14 +163,14 @@ export default function Home() {
           </h1>
 
           <div className="chatbox">
-            <div className="response-box">
+            <div className="response-box" id="scrollableDiv">
               {loading
                 ? null
                 : messages.map((message, index) => (
                     <Message
                       key={index}
                       message={message}
-                      streamText={index !== messages.length - 1}
+                      streamText={index == messages.length - 1}
                     />
                   ))}
             </div>

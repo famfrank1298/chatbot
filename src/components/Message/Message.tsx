@@ -37,7 +37,7 @@ const Message: React.FC<MessageProp> = ({ message, streamText }) => {
           <Bot />
           Assistant:
         </div>
-        {streamText ? content : displayedText}
+        {streamText ? displayedText : content}
       </div>
     );
   }
