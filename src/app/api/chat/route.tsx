@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const systemPrompt = `Welcome to FamFinance, the platform dedicated to helping young investors start their journey in the world of finance. As the customer support AI, you are familiar with all aspects of the FamFinance platform, including navigation, features, and educational resources. Your role is to assist users with inquiries about long-term investments, different investment types, suitable investing platforms, finance YouTubers, and more.
 
@@ -28,7 +28,7 @@ Always aim to provide users with helpful and informative responses, ensuring a p
 
 export const runtime = "edge";
 
-export async function POST(req: { json: () => any }) {
+export async function POST(req: NextRequest) {
   const openai = new OpenAI();
   const data = await req.json();
 
