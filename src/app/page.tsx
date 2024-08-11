@@ -2,7 +2,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Message from "../components/Message/Message";
 import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { db, dbName } from "./firebase";
@@ -22,6 +22,9 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const { user, setUser, googleSignIn, logOut } = UserAuth();
   const [loading, setLoading] = useState(true);
+  const scrollableDiv = document.getElementById(
+    "scrollableDiv"
+  ) as HTMLDivElement | null;
 
   const sendMessage = async () => {
     setMessage("");
@@ -59,7 +62,6 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("User: ", user);
         if (!user) {
           setMessages([
             {
@@ -75,16 +77,11 @@ export default function Home() {
           if (docSnap.exists()) {
             // old client
             const prevMsg = docSnap.data().chat;
-            setMessages([
-              ...prevMsg,
-              {
-                role: "assistant",
-                content:
-                  "Hi " +
-                  user?.displayName +
-                  "! Welcome back. How can I help you today?",
-              },
-            ]);
+            setMessages(prevMsg);
+            if (scrollableDiv) {
+              scrollableDiv.scrollIntoView({ behavior: "smooth" });
+              scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+            }
           } else {
             // new client
             const newChat = [
@@ -111,48 +108,13 @@ export default function Home() {
     };
 
     fetchData();
-  });
+  }, [user, messages, scrollableDiv]);
 
   const handleSignIn = async () => {
     try {
       setLoading(true);
       googleSignIn();
-      // const docRef = doc(db, dbName, user?.uid as string);
-      // const docSnap = await getDoc(docRef);
-
-      // if (docSnap.exists()) {
-      //   // old client
-      //   const prevMsg = docSnap.data().chat;
-      //   setMessages([
-      //     ...prevMsg,
-      //     {
-      //       role: "assistant",
-      //       content:
-      //         "Hi " +
-      //         user?.displayName +
-      //         "! Welcome back. How can I help you today?",
-      //     },
-      //   ]);
-      // } else {
-      //   // new client
-      //   const newChat = [
-      //     {
-      //       role: "assistant",
-      //       content:
-      //         "Hi " +
-      //         user?.displayName +
-      //         "! I'm the FamFinance support assistant. How can I help you today?",
-      //     },
-      //   ];
-      //   setMessages(newChat);
-      //   const newPerson = {
-      //     name: user?.displayName,
-      //     email: user?.email,
-      //     chat: newChat,
-      //   };
-      //   setDoc(docRef, newPerson);
-      // }
-      // setLoading(false);
+      setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -162,14 +124,6 @@ export default function Home() {
     try {
       setLoading(true);
       logOut();
-      const resetMessages = [
-        {
-          role: "assistant",
-          content:
-            "Hi! I'm the FamFinance support assistant. How can I help you today?",
-        },
-      ];
-      setMessages(resetMessages);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -208,14 +162,14 @@ export default function Home() {
           </h1>
 
           <div className="chatbox">
-            <div className="response-box">
+            <div className="response-box" id="scrollableDiv">
               {loading
                 ? null
                 : messages.map((message, index) => (
                     <Message
                       key={index}
                       message={message}
-                      streamText={index !== messages.length - 1 && index !== 0}
+                      streamText={index == messages.length - 1}
                     />
                   ))}
             </div>
