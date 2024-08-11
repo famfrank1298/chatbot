@@ -22,9 +22,17 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const { user, setUser, googleSignIn, logOut } = UserAuth();
   const [loading, setLoading] = useState(true);
-  const scrollableDiv = document.getElementById(
-    "scrollableDiv"
-  ) as HTMLDivElement | null;
+
+  useEffect(() => {
+    const scrollableDiv = document.getElementById(
+      "scrollableDiv"
+    ) as HTMLDivElement | null;
+
+    if (scrollableDiv) {
+      scrollableDiv.scrollIntoView({ behavior: "smooth" });
+      scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+    }
+  }, []);
 
   const sendMessage = async () => {
     setMessage("");
@@ -55,11 +63,6 @@ export default function Home() {
       await updateDoc(docRef, {
         chat: updatedMessages,
       });
-    }
-
-    if (scrollableDiv) {
-      scrollableDiv.scrollIntoView({ behavior: "smooth" });
-      scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
     }
   };
 
@@ -109,7 +112,7 @@ export default function Home() {
     };
 
     fetchData();
-  }, [user, messages, scrollableDiv]);
+  }, [user, messages]);
 
   const handleSignIn = async () => {
     try {
