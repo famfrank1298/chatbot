@@ -25,30 +25,32 @@ export default function Home() {
 
   const sendMessage = async () => {
     setMessage("");
-    setMessages((messages) => [
-      ...messages,
-      { role: "user", content: message },
-    ]);
+
+    // Create a new array with the current messages plus the new user message
+    const newMessages = [...messages, { role: "user", content: message }];
+    setMessages(newMessages);
 
     const response = await fetch("api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify([...messages, { role: "user", content: message }]),
+      body: JSON.stringify(newMessages),
     });
 
     const data = await response.json();
-    setMessages((messages) => [
-      ...messages,
+    // Add the assistant's response to the messages array
+    const updatedMessages = [
+      ...newMessages,
       { role: "assistant", content: data.message },
-    ]);
+    ];
+    setMessages(updatedMessages);
 
     // updating user db with new messages
     if (user) {
       const docRef = doc(db, dbName, user?.uid as string);
       await updateDoc(docRef, {
-        chat: messages,
+        chat: updatedMessages,
       });
     }
   };
@@ -57,39 +59,51 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docRef = doc(db, dbName, user?.uid as string);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          const prevMsg = docSnap.data().chat;
+        console.log("User: ", user);
+        if (!user) {
           setMessages([
-            ...prevMsg,
             {
               role: "assistant",
               content:
-                "Hi " +
-                user?.displayName +
-                "! Welcome back. How can I help you today?",
+                "Hi! I'm the FamFinance support assistant. How can I help you today?",
             },
           ]);
         } else {
-          const displayName = user ? user.displayName ?? "" : "";
-          setMessages([
-            {
-              role: "assistant",
-              content:
-                "Hi " +
-                displayName +
-                "! I'm the FamFinance support assistant. How can I help you today?",
-            },
-          ]);
+          const docRef = doc(db, dbName, user?.uid as string);
+          const docSnap = await getDoc(docRef);
 
-          const newPerson = {
-            name: user?.displayName,
-            email: user?.email,
-            chat: messages,
-          };
-          if (user) setDoc(docRef, newPerson);
+          if (docSnap.exists()) {
+            // old client
+            const prevMsg = docSnap.data().chat;
+            setMessages([
+              ...prevMsg,
+              {
+                role: "assistant",
+                content:
+                  "Hi " +
+                  user?.displayName +
+                  "! Welcome back. How can I help you today?",
+              },
+            ]);
+          } else {
+            // new client
+            const newChat = [
+              {
+                role: "assistant",
+                content:
+                  "Hi " +
+                  user?.displayName +
+                  "! I'm the FamFinance support assistant. How can I help you today?",
+              },
+            ];
+            setMessages(newChat);
+            const newPerson = {
+              name: user?.displayName,
+              email: user?.email,
+              chat: newChat,
+            };
+            setDoc(docRef, newPerson);
+          }
         }
       } catch (error) {
         console.error("Error fetching document:", error);
@@ -97,46 +111,48 @@ export default function Home() {
     };
 
     fetchData();
-  }, [user, messages]);
+  });
 
   const handleSignIn = async () => {
     try {
       setLoading(true);
       googleSignIn();
-      const docRef = doc(db, dbName, user?.uid as string);
-      const docSnap = await getDoc(docRef);
+      // const docRef = doc(db, dbName, user?.uid as string);
+      // const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        const prevMsg = docSnap.data().chat;
-        setMessages([
-          ...prevMsg,
-          {
-            role: "assistant",
-            content:
-              "Hi " +
-              user?.displayName +
-              "! Welcome back. How can I help you today?",
-          },
-        ]);
-      } else {
-        setMessages([
-          {
-            role: "assistant",
-            content:
-              "Hi " +
-              user?.displayName +
-              "! I'm the FamFinance support assistant. How can I help you today?",
-          },
-        ]);
-
-        const newPerson = {
-          name: user?.displayName,
-          email: user?.email,
-          chat: messages,
-        };
-        setDoc(docRef, newPerson);
-      }
-      setLoading(false);
+      // if (docSnap.exists()) {
+      //   // old client
+      //   const prevMsg = docSnap.data().chat;
+      //   setMessages([
+      //     ...prevMsg,
+      //     {
+      //       role: "assistant",
+      //       content:
+      //         "Hi " +
+      //         user?.displayName +
+      //         "! Welcome back. How can I help you today?",
+      //     },
+      //   ]);
+      // } else {
+      //   // new client
+      //   const newChat = [
+      //     {
+      //       role: "assistant",
+      //       content:
+      //         "Hi " +
+      //         user?.displayName +
+      //         "! I'm the FamFinance support assistant. How can I help you today?",
+      //     },
+      //   ];
+      //   setMessages(newChat);
+      //   const newPerson = {
+      //     name: user?.displayName,
+      //     email: user?.email,
+      //     chat: newChat,
+      //   };
+      //   setDoc(docRef, newPerson);
+      // }
+      // setLoading(false);
     } catch (error) {
       console.log(error);
     }
@@ -146,13 +162,14 @@ export default function Home() {
     try {
       setLoading(true);
       logOut();
-      setMessages([
+      const resetMessages = [
         {
           role: "assistant",
           content:
             "Hi! I'm the FamFinance support assistant. How can I help you today?",
         },
-      ]);
+      ];
+      setMessages(resetMessages);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -172,10 +189,10 @@ export default function Home() {
       <div className="nav-container">
         <h1>𝔽𝕒𝕞𝔽𝕚𝕟𝕒𝕟𝕔𝕖</h1>
         <div className="nav-list">
-          {loading ? null : !user ? (
-            <Button onClick={handleSignIn}> Login</Button>
-          ) : (
+          {loading ? null : user ? (
             <Button onClick={handleSignOut}> Sign Out</Button>
+          ) : (
+            <Button onClick={handleSignIn}> Login</Button>
           )}
           <ModeToggle />
         </div>
@@ -198,7 +215,7 @@ export default function Home() {
                     <Message
                       key={index}
                       message={message}
-                      streamText={index !== messages.length - 1}
+                      streamText={index !== messages.length - 1 && index !== 0}
                     />
                   ))}
             </div>
