@@ -56,9 +56,14 @@ export default function Home() {
         chat: updatedMessages,
       });
     }
+
+    if (scrollableDiv) {
+      scrollableDiv.scrollIntoView({ behavior: "smooth" });
+      scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
+    }
   };
 
-  // retrieving previous message data
+  // handles user data, whether new client, returning client, or guest
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,10 +83,6 @@ export default function Home() {
             // old client
             const prevMsg = docSnap.data().chat;
             setMessages(prevMsg);
-            if (scrollableDiv) {
-              scrollableDiv.scrollIntoView({ behavior: "smooth" });
-              scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
-            }
           } else {
             // new client
             const newChat = [

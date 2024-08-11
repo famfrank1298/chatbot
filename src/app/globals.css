@@ -128,7 +128,7 @@ p {
 }
 
 .chatbox {
-  width: 100%;
+  width: 500px;
   margin: 1rem auto;
   box-shadow: 0 0 4px hsl(var(--foreground));
   border-radius: 20px;
