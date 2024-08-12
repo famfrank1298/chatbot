@@ -32,7 +32,7 @@ export default function Home() {
       scrollableDiv.scrollIntoView({ behavior: "smooth" });
       scrollableDiv.scrollTop = scrollableDiv.scrollHeight;
     }
-  }, []);
+  }, [messages]);
 
   const sendMessage = async () => {
     setMessage("");
@@ -112,7 +112,7 @@ export default function Home() {
     };
 
     fetchData();
-  }, [user, messages]);
+  }, [user]);
 
   const handleSignIn = async () => {
     try {
