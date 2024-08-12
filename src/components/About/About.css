@@ -9,4 +9,7 @@
   border-top: 2px dotted hsl(var(--foreground));
   padding-bottom: 1rem;
   padding-top: 2rem;
+  background-color: hsl(var(--background));
+  padding-right: 1rem;
+  padding-left: 1rem;
 }
