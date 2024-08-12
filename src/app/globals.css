@@ -119,6 +119,13 @@ p {
   width: 100vw;
 }
 
+.body-bg {
+  background-image: url("/body-bg.gif");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .body-section {
   display: flex;
   justify-content: space-evenly;
@@ -130,10 +137,11 @@ p {
 .chatbox {
   width: 500px;
   margin: 1rem auto;
-  box-shadow: 0 0 4px hsl(var(--foreground));
+  box-shadow: 0 0 10px hsl(var(--foreground));
   border-radius: 20px;
   padding: 1rem;
   margin-bottom: 5rem;
+  @apply bg-background text-foreground;
 }
 
 .nav-container {

@@ -156,43 +156,45 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="body-section">
-        <About />
-        <div>
-          <h1 className="welcome-text">
-            {user
-              ? "Welcome, " + user.displayName + " 😎"
-              : "Welcome, New User!"}
-          </h1>
+      <div className="body-bg">
+        <div className="body-section">
+          <About />
+          <div>
+            <h1 className="welcome-text">
+              {user
+                ? "Welcome, " + user.displayName + " 😎"
+                : "Welcome, New User!"}
+            </h1>
 
-          <div className="chatbox">
-            <div className="response-box" id="scrollableDiv">
-              {loading
-                ? null
-                : messages.map((message, index) => (
-                    <Message
-                      key={index}
-                      message={message}
-                      streamText={index == messages.length - 1}
-                    />
-                  ))}
-            </div>
-            <div className="text-container">
-              <Textarea
-                className="w-full text-lg"
-                placeholder="Say something..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-              <Button
-                type="submit"
-                size="icon"
-                disabled={!message}
-                className="rounded-full sendButton"
-                onClick={sendMessage}
-              >
-                <Send size={24} />
-              </Button>
+            <div className="chatbox">
+              <div className="response-box" id="scrollableDiv">
+                {loading
+                  ? null
+                  : messages.map((message, index) => (
+                      <Message
+                        key={index}
+                        message={message}
+                        streamText={index == messages.length - 1}
+                      />
+                    ))}
+              </div>
+              <div className="text-container">
+                <Textarea
+                  className="w-full text-lg"
+                  placeholder="Say something..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={!message}
+                  className="rounded-full sendButton"
+                  onClick={sendMessage}
+                >
+                  <Send size={24} />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
