@@ -2,3 +2,8 @@
   border-top: 1px solid hsl(var(--foreground));
   padding: 3rem 0;
 }
+
+.footer-body {
+  width: 60%;
+  margin: 0 auto;
+}
